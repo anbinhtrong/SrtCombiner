@@ -1,7 +1,7 @@
 ﻿// --- CONFIGURATION ---
 // With top-level statements, your code starts executing directly.
 // Define the source directory containing the .srt files.
-string sourceFolderPath = @"D:\Hoctap\Chung Khoan\Udemy - Fibonacci Technical Analysis Skill for Forex & Stock Trading 2022-5";
+string sourceFolderPath = @"D:\Hoctap\Computer Science\AI\Buiding AI Application with Semantic Kernel and CSharp";
 
 string outputFileName = Path.GetFileName(sourceFolderPath);
 
