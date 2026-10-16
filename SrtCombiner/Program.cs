@@ -1,7 +1,7 @@
 ﻿// --- CONFIGURATION ---
 // With top-level statements, your code starts executing directly.
 // Define the source directory containing the .srt files.
-string sourceFolderPath = @"D:\Hoctap\Computer Science\AI\Buiding AI Application with Semantic Kernel and CSharp";
+string sourceFolderPath = @"D:\Hoctap\Computer Science\NextJs\Master Nextjs 15 The Missing Guide";
 
 string outputFileName = Path.GetFileName(sourceFolderPath);
 

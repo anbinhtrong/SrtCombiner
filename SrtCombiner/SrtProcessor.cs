@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
@@ -30,9 +30,11 @@ public static class SrtProcessor
         var settings = new AppSettings();
         var searchOption = settings.IncludeSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
 
-        // Gather files with supported extensions.
+        // Gather files with supported extensions and sort them using natural/alphanumeric sort
+        // so that "1 - ...", "2 - ...", ..., "10 - ..." are ordered numerically instead of alphabetically.
         var allFiles = Directory.GetFiles(sourceFolderPath, "*.*", searchOption)
             .Where(f => settings.SupportedExtensions.Contains(Path.GetExtension(f).ToLowerInvariant()))
+            .OrderBy(f => Path.GetFileName(f), new NaturalStringComparer())
             .ToArray();
 
         if (allFiles.Length == 0)
@@ -244,4 +246,41 @@ public static class SrtProcessor
 
     private static string FormatSrtTimestamp(TimeSpan t) => t.ToString(@"hh\:mm\:ss\,fff", CultureInfo.InvariantCulture);
     private static string FormatVttTimestamp(TimeSpan t) => t.ToString(@"hh\:mm\:ss\.fff", CultureInfo.InvariantCulture);
+
+    /// <summary>
+    /// Natural/alphanumeric comparer to sort strings containing numbers naturally
+    /// (e.g., "1 - ...", "2 - ...", ..., "10 - ..." instead of "1 - ...", "10 - ...", "2 - ...").
+    /// </summary>
+    private class NaturalStringComparer : IComparer<string>
+    {
+        public int Compare(string? x, string? y)
+        {
+            if (ReferenceEquals(x, y)) return 0;
+            if (x == null) return -1;
+            if (y == null) return 1;
+
+            var xTokens = Regex.Split(x, @"(\d+)");
+            var yTokens = Regex.Split(y, @"(\d+)");
+
+            int length = Math.Min(xTokens.Length, yTokens.Length);
+            for (int i = 0; i < length; i++)
+            {
+                var tokenX = xTokens[i];
+                var tokenY = yTokens[i];
+
+                if (tokenX == tokenY) continue;
+
+                if (long.TryParse(tokenX, out long numX) && long.TryParse(tokenY, out long numY))
+                {
+                    int numCompare = numX.CompareTo(numY);
+                    if (numCompare != 0) return numCompare;
+                }
+
+                int strCompare = string.Compare(tokenX, tokenY, StringComparison.OrdinalIgnoreCase);
+                if (strCompare != 0) return strCompare;
+            }
+
+            return xTokens.Length.CompareTo(yTokens.Length);
+        }
+    }
 }
